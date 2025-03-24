@@ -1,81 +1,102 @@
-# Next Js Starter
+# Expense Tracker MVP
 
-This is a Next.js project bootstrapped with `create-next-app` and enhanced with modern development tools.
+A streamlined expense tracking system that combines WhatsApp messaging with Excel spreadsheets, wrapped in a modern Next.js web interface.
 
-## Project Overview
+## Features
 
-Next js starter is a web application built with Next.js 14, React 18, and TypeScript. The project uses Tailwind CSS for styling and includes the shadcn/ui component library.
+- Daily WhatsApp reminders at 9 PM
+- Simple expense logging via WhatsApp messages
+- Beautiful web dashboard for expense visualization
+- Automatic Excel file generation
+- Date range filtering and category breakdowns
 
-## Tech Stack
+## Prerequisites
 
-- **Framework:** Next.js 14.2.5  
-- **UI Library:** React 18  
-- **Styling:** Tailwind CSS  
-- **Components:** shadcn/ui  
-- **Language:** TypeScript  
-- **State Management:** [Add your state management solution]  
-- **Form Handling:** [Add your form handling solution]  
-- **API Integration:** [Add your API integration approach]  
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## Project Structure
-
-[Describe your folder structure here]
-
-## Development Workflow
-
-This project uses several tools to ensure code quality:
-
-- **ESLint:** For code linting  
-- **Prettier:** For code formatting  
-- **Husky:** For Git hooks  
-- **lint-staged:** For running linters on staged files  
-
-## Available Scripts
-
-- `npm run dev` - Start the development server  
-- `npm run build` - Build the application for production  
-- `npm run start` - Start the production server  
-- `npm run lint` - Run ESLint  
-- `npm run lint:fix` - Run ESLint with auto-fix  
-- `npm run prettier-watch` - Watch files and format them with Prettier  
+- Node.js 18 or later
+- npm or yarn
+- Twilio account with WhatsApp sandbox enabled
+- A public URL for webhook endpoints (e.g., ngrok for local development)
 
 ## Environment Variables
 
-The project uses Zod for environment variable validation. Add your environment variables to the `.env.local` file and update the schema in `src/lib/env.ts`.
+Create a `.env.local` file in the root directory with the following variables:
 
-## Styling
+```env
+TWILIO_ACCOUNT_SID=your_account_sid
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_WHATSAPP_NUMBER=your_whatsapp_number
+```
 
-This project uses Tailwind CSS with a custom configuration. The theme is defined in `tailwind.config.ts` and includes:
+## Installation
 
-- Custom color palette with light and dark mode support  
-- Custom animations  
-- Responsive design utilities  
+1. Clone the repository:
 
-## Learn More
+   ```bash
+   git clone <repository-url>
+   cd expense-tracker
+   ```
 
-To learn more about the technologies used in this project:
+2. Install dependencies:
 
-- [Next.js Documentation](https://nextjs.org/docs)  
-- [React Documentation](https://reactjs.org/docs)  
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)  
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)  
-- [shadcn/ui Documentation](https://ui.shadcn.com)  
+   ```bash
+   npm install
+   ```
 
-## Deployment
+3. Set up environment variables as described above.
 
-The easiest way to deploy your Next.js app is to use the Vercel Platform from the creators of Next.js.  
-Check out the [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+4. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Start the reminder script:
+   ```bash
+   npm run reminders
+   ```
+
+## Usage
+
+1. **WhatsApp Integration**:
+
+   - Join your Twilio WhatsApp sandbox by sending the code to the provided number
+   - Send expenses in the format: `Expense: [amount] [category] [note]`
+   - Example: `Expense: 25.50 Food & Dining Lunch at cafe`
+
+2. **Web Dashboard**:
+   - Open `http://localhost:3000` in your browser
+   - View your expenses, filter by date range, and see category breakdowns
+   - Excel files are automatically generated in the `data/expenses` directory
+
+## Development
+
+- `npm run dev`: Start the development server
+- `npm run build`: Build the production application
+- `npm run start`: Start the production server
+- `npm run reminders`: Start the daily reminder script
+- `npm run lint`: Run ESLint
+- `npm run lint:fix`: Fix ESLint issues
+
+## Project Structure
+
+```
+src/
+├── app/              # Next.js app directory
+├── components/       # React components
+├── lib/             # Utility functions and shared code
+├── scripts/         # Node.js scripts (e.g., reminders)
+├── types/           # TypeScript type definitions
+└── utils/           # Helper functions
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request
 
 ## License
 
-All rights reserved by Sampath Kumara
+This project is licensed under the MIT License - see the LICENSE file for details.

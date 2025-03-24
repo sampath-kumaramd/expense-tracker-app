@@ -47,6 +47,7 @@ Categories available:
 }
 
 function parseExpenseMessage(message) {
+  console.log('Parsing expense message:', message);
   const regex = /Expense:\s*(\d+(?:\.\d{1,2})?)\s+([A-Za-z\s&]+)\s+(.+)/;
   const match = message.match(regex);
 

@@ -7,18 +7,37 @@ import { parseExpenseMessage, sendWhatsAppMessage } from '@/utils/whatsapp';
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const message = formData.get('Body') as string;
+    const messageStatus = formData.get('MessageStatus');
+    const body = formData.get('Body') as string;
     const from = formData.get('From') as string;
     const userId = from.replace('whatsapp:', '');
 
-    if (!message || !from) {
+    // Log the incoming webhook data for debugging
+    console.log('Webhook received:', {
+      messageStatus,
+      body,
+      from,
+      userId,
+      formData: Object.fromEntries(formData.entries()),
+    });
+
+    // If this is a status update, just acknowledge it
+    if (messageStatus) {
+      return NextResponse.json({
+        success: true,
+        message: 'Status update received',
+      });
+    }
+
+    // Process only actual messages
+    if (!body || !from) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    const parsedExpense = parseExpenseMessage(message);
+    const parsedExpense = parseExpenseMessage(body);
     if (!parsedExpense) {
       await sendWhatsAppMessage(
         userId,

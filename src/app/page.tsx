@@ -15,7 +15,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
 
   // For demo purposes, using a hardcoded user ID
-  const userId = 'demo-user';
+  const userId = '+94760937443';
 
   useEffect(() => {
     fetchExpenses();

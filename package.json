@@ -18,6 +18,7 @@
     "**/*": "prettier --write --ignore-unknown"
   },
   "dependencies": {
+    "@google-cloud/local-auth": "^3.0.1",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-popover": "^1.1.6",
     "@radix-ui/react-select": "^2.1.6",
@@ -31,6 +32,7 @@
     "dotenv": "^16.4.7",
     "exceljs": "^4.4.0",
     "express": "^4.21.2",
+    "googleapis": "^148.0.0",
     "lucide-react": "^0.427.0",
     "next": "14.2.5",
     "node-cron": "^3.0.3",

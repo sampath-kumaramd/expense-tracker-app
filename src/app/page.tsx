@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
 
+import { GoogleSheetsConnect } from '@/components/GoogleSheetsConnect';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Expense, ExpenseCategory } from '@/types/expense';
 
@@ -69,6 +70,16 @@ export default function Dashboard() {
   return (
     <div className="container mx-auto p-8">
       <h1 className="text-3xl font-bold mb-8">Expense Dashboard</h1>
+
+      <div className="mb-8 bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">
+          Google Sheets Integration
+        </h2>
+        <p className="text-gray-600 mb-4">
+          Connect your Google Sheets to export and manage your expenses.
+        </p>
+        <GoogleSheetsConnect />
+      </div>
 
       <div className="mb-8">
         <DateRangePicker

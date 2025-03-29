@@ -10,14 +10,19 @@ const SCOPES = [
 ];
 
 const TOKEN_PATH = path.join(process.cwd(), 'data', 'token.json');
-const CREDENTIALS_PATH = path.join(process.cwd(), 'data', 'credentials.json');
 
 export class GoogleDriveService {
   private static instance: GoogleDriveService;
   private auth: OAuth2Client | null = null;
   private spreadsheetId: string | null = null;
 
-  private constructor() {}
+  private constructor() {
+    this.auth = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/google/callback`
+    );
+  }
 
   public static getInstance(): GoogleDriveService {
     if (!GoogleDriveService.instance) {
@@ -26,39 +31,44 @@ export class GoogleDriveService {
     return GoogleDriveService.instance;
   }
 
-  private async loadSavedCredentialsIfExist(): Promise<OAuth2Client | null> {
+  public async getAuthUrl(): Promise<string> {
+    if (!this.auth) throw new Error('OAuth2Client not initialized');
+    return this.auth.generateAuthUrl({
+      access_type: 'offline',
+      scope: SCOPES,
+    });
+  }
+
+  public async handleAuthCallback(code: string): Promise<void> {
+    if (!this.auth) throw new Error('OAuth2Client not initialized');
+
+    const { tokens } = await this.auth.getToken(code);
+    this.auth.setCredentials(tokens);
+
+    // Save the tokens
+    const tokenDir = path.dirname(TOKEN_PATH);
+    if (!fs.existsSync(tokenDir)) {
+      fs.mkdirSync(tokenDir, { recursive: true });
+    }
+    fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
+  }
+
+  private async loadSavedCredentialsIfExist(): Promise<boolean> {
     try {
-      if (!fs.existsSync(TOKEN_PATH)) return null;
+      if (!fs.existsSync(TOKEN_PATH)) return false;
       const content = fs.readFileSync(TOKEN_PATH, 'utf-8');
       const credentials = JSON.parse(content);
-      const oauth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URI
-      );
-      oauth2Client.setCredentials(credentials);
-      return oauth2Client;
+      this.auth?.setCredentials(credentials);
+      return true;
     } catch (err) {
-      return null;
+      console.error('Error loading saved credentials:', err);
+      return false;
     }
   }
 
-  private async saveCredentials(client: OAuth2Client): Promise<void> {
-    const content = await fs.promises.readFile(CREDENTIALS_PATH);
-    const keys = JSON.parse(content.toString());
-    const key = keys.installed || keys.web;
-    const payload = JSON.stringify({
-      type: 'authorized_user',
-      client_id: key.client_id,
-      client_secret: key.client_secret,
-      refresh_token: client.credentials.refresh_token,
-    });
-    await fs.promises.writeFile(TOKEN_PATH, payload);
-  }
-
   public async initialize(): Promise<void> {
-    this.auth = await this.loadSavedCredentialsIfExist();
-    if (!this.auth) {
+    const hasCredentials = await this.loadSavedCredentialsIfExist();
+    if (!hasCredentials) {
       throw new Error('Authentication required. Please authenticate first.');
     }
   }

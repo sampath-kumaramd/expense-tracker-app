@@ -11,6 +11,7 @@ interface SheetData {
 export function GoogleSheetsConnect() {
   const [sheets, setSheets] = useState<SheetData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadSheets();
@@ -40,11 +41,23 @@ export function GoogleSheetsConnect() {
   const handleConnect = async () => {
     try {
       setIsLoading(true);
+      setError(null);
+
       const response = await fetch('/api/auth/google');
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
-      console.error('Error connecting to Google:', error);
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Redirect to Google's auth page
+      window.location.href = data.url;
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to connect to Google Sheets'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +87,11 @@ export function GoogleSheetsConnect() {
   return (
     <div className="space-y-4">
       <div className="flex gap-4">
-        <Button onClick={handleConnect} disabled={isLoading} className="flex-1">
+        <Button
+          onClick={handleConnect}
+          disabled={isLoading}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
           {isLoading ? 'Connecting...' : 'Connect Google Sheets'}
         </Button>
         {localStorage.getItem('google_access_token') && (
@@ -87,6 +104,8 @@ export function GoogleSheetsConnect() {
           </Button>
         )}
       </div>
+
+      {error && <p className="text-red-500 text-sm">{error}</p>}
 
       {sheets && sheets.length > 0 && (
         <div className="mt-4">

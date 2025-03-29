@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 
-import { GoogleDriveService } from '@/services/googleDrive';
-
 interface UseGoogleSheetsOptions {
   onError?: (error: Error) => void;
 }
@@ -14,10 +12,14 @@ export function useGoogleSheets(options: UseGoogleSheetsOptions = {}) {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const service = GoogleDriveService.getInstance();
-      await service.initialize();
-      const sheetData = await service.readData();
-      setData(sheetData);
+      const response = await fetch('/api/sheets');
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch data');
+      }
+
+      setData(result.data);
       setError(null);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
@@ -36,9 +38,22 @@ export function useGoogleSheets(options: UseGoogleSheetsOptions = {}) {
   const appendData = async (values: any[][]) => {
     try {
       setIsLoading(true);
-      const service = GoogleDriveService.getInstance();
-      await service.appendData(values);
-      await fetchData(); // Refresh data after append
+      const response = await fetch('/api/sheets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ values, action: 'append' }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to append data');
+      }
+
+      setData(result.data);
+      setError(null);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       setError(error);
@@ -51,9 +66,22 @@ export function useGoogleSheets(options: UseGoogleSheetsOptions = {}) {
   const updateData = async (range: string, values: any[][]) => {
     try {
       setIsLoading(true);
-      const service = GoogleDriveService.getInstance();
-      await service.updateData(range, values);
-      await fetchData(); // Refresh data after update
+      const response = await fetch('/api/sheets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ values, range, action: 'update' }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update data');
+      }
+
+      setData(result.data);
+      setError(null);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       setError(error);

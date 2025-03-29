@@ -8,6 +8,7 @@ import type { DateRange } from 'react-day-picker';
 import { GoogleSheetsConnect } from '@/components/GoogleSheetsConnect';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { useGoogleSheets } from '@/hooks/useGoogleSheets';
 import { Expense, ExpenseCategory } from '@/types/expense';
 
 export default function Dashboard() {
@@ -19,6 +20,18 @@ export default function Dashboard() {
 
   // For demo purposes, using a hardcoded user ID
   const userId = '+94760937443';
+
+  const {
+    data,
+    isLoading,
+    error: googleSheetsError,
+    appendData,
+    updateData,
+  } = useGoogleSheets({
+    onError: (error) => {
+      console.error('Google Sheets error:', error);
+    },
+  });
 
   useEffect(() => {
     fetchExpenses();
@@ -76,6 +89,17 @@ export default function Dashboard() {
     },
     {} as Record<ExpenseCategory, number>
   );
+
+  const handleAddExpense = async (expense: any) => {
+    await appendData([
+      [
+        new Date().toISOString(),
+        expense.amount,
+        expense.category,
+        expense.description,
+      ],
+    ]);
+  };
 
   if (loading) {
     return <div className="p-8">Loading...</div>;

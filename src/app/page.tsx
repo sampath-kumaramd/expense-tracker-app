@@ -7,7 +7,6 @@ import type { DateRange } from 'react-day-picker';
 import { GoogleSheetsConnect } from '@/components/GoogleSheetsConnect';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { sendTestMessage } from '@/scripts/send-reminders';
 import { Expense, ExpenseCategory } from '@/types/expense';
 
 export default function Dashboard() {
@@ -25,7 +24,19 @@ export default function Dashboard() {
   }, [dateRange]);
 
   const triggerTestReminder = async () => {
-    await sendTestMessage();
+    try {
+      setReminderStatus('Sending reminder...');
+      const response = await fetch('/api/reminders', {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to send reminder');
+      }
+      setReminderStatus('Reminder sent successfully!');
+    } catch (error) {
+      setReminderStatus('Failed to send reminder');
+      console.error('Error sending reminder:', error);
+    }
   };
 
   const fetchExpenses = async () => {

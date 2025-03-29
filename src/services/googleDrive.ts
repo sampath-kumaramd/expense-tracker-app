@@ -4,10 +4,7 @@ import path from 'path';
 import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 
-const SCOPES = [
-  'https://www.googleapis.com/auth/spreadsheets',
-  'https://www.googleapis.com/auth/drive.file',
-];
+const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
 const TOKEN_PATH = path.join(process.cwd(), 'data', 'token.json');
 
@@ -29,6 +26,10 @@ export class GoogleDriveService {
       GoogleDriveService.instance = new GoogleDriveService();
     }
     return GoogleDriveService.instance;
+  }
+
+  public setSpreadsheetId(id: string) {
+    this.spreadsheetId = id;
   }
 
   public async getAuthUrl(): Promise<string> {
@@ -128,11 +129,12 @@ export class GoogleDriveService {
 
   public async readData(): Promise<any[][]> {
     if (!this.auth) throw new Error('Not authenticated');
-    const spreadsheetId = await this.createOrGetSpreadsheet();
+    if (!this.spreadsheetId) throw new Error('No spreadsheet ID provided');
+
     const sheets = google.sheets({ version: 'v4', auth: this.auth });
 
     const response = await sheets.spreadsheets.values.get({
-      spreadsheetId,
+      spreadsheetId: this.spreadsheetId,
       range: 'Expenses!A:Z',
     });
 
@@ -141,11 +143,12 @@ export class GoogleDriveService {
 
   public async appendData(values: any[][]): Promise<void> {
     if (!this.auth) throw new Error('Not authenticated');
-    const spreadsheetId = await this.createOrGetSpreadsheet();
+    if (!this.spreadsheetId) throw new Error('No spreadsheet ID provided');
+
     const sheets = google.sheets({ version: 'v4', auth: this.auth });
 
     await sheets.spreadsheets.values.append({
-      spreadsheetId,
+      spreadsheetId: this.spreadsheetId,
       range: 'Expenses!A:Z',
       valueInputOption: 'USER_ENTERED',
       requestBody: {
@@ -156,11 +159,12 @@ export class GoogleDriveService {
 
   public async updateData(range: string, values: any[][]): Promise<void> {
     if (!this.auth) throw new Error('Not authenticated');
-    const spreadsheetId = await this.createOrGetSpreadsheet();
+    if (!this.spreadsheetId) throw new Error('No spreadsheet ID provided');
+
     const sheets = google.sheets({ version: 'v4', auth: this.auth });
 
     await sheets.spreadsheets.values.update({
-      spreadsheetId,
+      spreadsheetId: this.spreadsheetId,
       range,
       valueInputOption: 'USER_ENTERED',
       requestBody: {

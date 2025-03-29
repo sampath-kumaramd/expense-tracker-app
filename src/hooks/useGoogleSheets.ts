@@ -4,7 +4,10 @@ interface UseGoogleSheetsOptions {
   onError?: (error: Error) => void;
 }
 
-export function useGoogleSheets(options: UseGoogleSheetsOptions = {}) {
+export function useGoogleSheets(
+  sheetId: string,
+  options: UseGoogleSheetsOptions = {}
+) {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<any[][]>([]);
   const [error, setError] = useState<Error | null>(null);
@@ -12,7 +15,7 @@ export function useGoogleSheets(options: UseGoogleSheetsOptions = {}) {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/sheets');
+      const response = await fetch(`/api/sheets?sheetId=${sheetId}`);
       const result = await response.json();
 
       if (!response.ok) {
@@ -43,7 +46,7 @@ export function useGoogleSheets(options: UseGoogleSheetsOptions = {}) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ values, action: 'append' }),
+        body: JSON.stringify({ values, action: 'append', sheetId }),
       });
 
       const result = await response.json();
@@ -71,7 +74,7 @@ export function useGoogleSheets(options: UseGoogleSheetsOptions = {}) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ values, range, action: 'update' }),
+        body: JSON.stringify({ values, range, action: 'update', sheetId }),
       });
 
       const result = await response.json();
@@ -92,8 +95,10 @@ export function useGoogleSheets(options: UseGoogleSheetsOptions = {}) {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (sheetId) {
+      fetchData();
+    }
+  }, [sheetId]);
 
   return {
     data,

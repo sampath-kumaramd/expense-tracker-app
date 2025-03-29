@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import dateFormat from 'dateformat';
 import type { DateRange } from 'react-day-picker';
 
-import { GoogleSheetsConnect } from '@/components/GoogleSheetsConnect';
+import { GoogleSheetInput } from '@/components/GoogleSheetInput';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { useGoogleSheets } from '@/hooks/useGoogleSheets';
@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reminderStatus, setReminderStatus] = useState<string>('');
+  const [sheetId, setSheetId] = useState<string>('');
 
   // For demo purposes, using a hardcoded user ID
   const userId = '+94760937443';
@@ -27,15 +28,22 @@ export default function Dashboard() {
     error: googleSheetsError,
     appendData,
     updateData,
-  } = useGoogleSheets({
-    onError: (error) => {
-      console.error('Google Sheets error:', error);
+  } = useGoogleSheets(sheetId, {
+    onError: (error: Error) => {
+      console.error('Google Sheets error:', error.message);
     },
   });
 
+  const handleSheetUrlSubmit = (id: string) => {
+    console.log('handleSheetUrlSubmit', id);
+    setSheetId(id);
+  };
+
   useEffect(() => {
-    fetchExpenses();
-  }, [dateRange]);
+    if (data) {
+      fetchExpenses();
+    }
+  }, [dateRange, data]);
 
   const triggerTestReminder = async () => {
     try {
@@ -71,8 +79,11 @@ export default function Dashboard() {
 
       const data = await response.json();
       setExpenses(data.expenses);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'An error occurred';
+      setError(message);
+      console.error('Error fetching expenses:', error);
     } finally {
       setLoading(false);
     }
@@ -101,13 +112,13 @@ export default function Dashboard() {
     ]);
   };
 
-  if (loading) {
-    return <div className="p-8">Loading...</div>;
-  }
+  // if (loading) {
+  //   return <div className="p-8">Loading...</div>;
+  // }
 
-  if (error) {
-    return <div className="p-8 text-red-500">Error: {error}</div>;
-  }
+  // if (error) {
+  //   return <div className="p-8 text-red-500">Error: {error}</div>;
+  // }
 
   return (
     <div className="container mx-auto p-8">
@@ -143,9 +154,8 @@ export default function Dashboard() {
         <p className="text-gray-600 mb-4">
           Connect your Google Sheets to export and manage your expenses.
         </p>
-        <GoogleSheetsConnect />
       </div>
-
+      <GoogleSheetInput onSheetUrlSubmit={handleSheetUrlSubmit} />
       <div className="mb-8">
         <DateRangePicker
           dateRange={dateRange}

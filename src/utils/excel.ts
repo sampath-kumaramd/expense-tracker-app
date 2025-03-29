@@ -70,10 +70,29 @@ export async function readExcelFile(userId: string): Promise<Expense[]> {
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return; // Skip header row
 
+    const dateCell = row.getCell(1);
+    let date: Date;
+
+    // Handle different date formats from Excel
+    if (dateCell.type === ExcelJS.ValueType.Date) {
+      date = dateCell.value as Date;
+    } else {
+      // If it's not already a Date object, try to parse it
+      date = new Date(dateCell.value as string);
+    }
+
+    // Ensure it's a valid date
+    if (isNaN(date.getTime())) {
+      console.warn(
+        `Invalid date found in row ${rowNumber}, using current date`
+      );
+      date = new Date();
+    }
+
     expenses.push({
       id: `expense-${rowNumber}`,
-      date: new Date(row.getCell(1).value as string),
-      amount: row.getCell(2).value as number,
+      date: date,
+      amount: Number(row.getCell(2).value),
       category: row.getCell(3).value as Expense['category'],
       note: row.getCell(4).value as string,
       userId,

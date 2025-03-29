@@ -6,7 +6,9 @@ import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
 
 import { GoogleSheetsConnect } from '@/components/GoogleSheetsConnect';
+import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { sendTestMessage } from '@/scripts/send-reminders';
 import { Expense, ExpenseCategory } from '@/types/expense';
 
 export default function Dashboard() {
@@ -14,6 +16,7 @@ export default function Dashboard() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reminderStatus, setReminderStatus] = useState<string>('');
 
   // For demo purposes, using a hardcoded user ID
   const userId = '+94760937443';
@@ -21,6 +24,10 @@ export default function Dashboard() {
   useEffect(() => {
     fetchExpenses();
   }, [dateRange]);
+
+  const triggerTestReminder = async () => {
+    await sendTestMessage();
+  };
 
   const fetchExpenses = async () => {
     try {
@@ -70,6 +77,29 @@ export default function Dashboard() {
   return (
     <div className="container mx-auto p-8">
       <h1 className="text-3xl font-bold mb-8">Expense Dashboard</h1>
+
+      <div className="mb-8 bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">Test Controls</h2>
+        <div className="flex items-center gap-4">
+          <Button
+            onClick={triggerTestReminder}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Send Test Reminder
+          </Button>
+          {reminderStatus && (
+            <span
+              className={`text-sm ${
+                reminderStatus.includes('success')
+                  ? 'text-green-600'
+                  : 'text-blue-600'
+              }`}
+            >
+              {reminderStatus}
+            </span>
+          )}
+        </div>
+      </div>
 
       <div className="mb-8 bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">

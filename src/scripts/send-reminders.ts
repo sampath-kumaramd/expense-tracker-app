@@ -7,7 +7,7 @@ const { sendDailyReminder } = require('../utils/whatsapp');
 const USERS = ['+94760937443']; // Replace with your actual WhatsApp number
 
 // Function to send immediate test message
-async function sendTestMessage() {
+export async function sendTestMessage() {
   console.log('Sending test message...');
 
   for (const user of USERS) {

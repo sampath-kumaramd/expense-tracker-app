@@ -88,7 +88,7 @@ export function GoogleSheetsConnect() {
         )}
       </div>
 
-      {sheets.length > 0 && (
+      {sheets && sheets.length > 0 && (
         <div className="mt-4">
           <h3 className="text-lg font-semibold mb-2">Your Sheets</h3>
           <ul className="space-y-2">

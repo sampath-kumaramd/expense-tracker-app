@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
-import { readExcelFile } from '@/utils/excel';
+import { GoogleDriveService } from '@/services/googleDrive';
+import { Expense } from '@/types/expense';
 
 export async function GET(request: Request) {
   try {
@@ -16,7 +17,24 @@ export async function GET(request: Request) {
       );
     }
 
-    const expenses = await readExcelFile(userId);
+    // Initialize Google Drive service
+    const googleDrive = await GoogleDriveService.getInstance();
+
+    // Read data from Google Sheets
+    const data = await googleDrive.readData();
+
+    // Convert sheet data to expenses
+    const expenses: Expense[] = data
+      .slice(1)
+      .map((row, index) => ({
+        id: `expense-${index}`,
+        date: new Date(row[0]),
+        amount: Number(row[1]),
+        category: row[2] as Expense['category'],
+        note: row[3],
+        userId: row[4],
+      }))
+      .filter((expense) => expense.userId === userId);
 
     // Filter expenses by date range if provided
     let filteredExpenses = expenses;

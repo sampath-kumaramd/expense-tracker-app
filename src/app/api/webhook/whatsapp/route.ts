@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
+import { GoogleDriveService } from '@/services/googleDrive';
 import { Expense } from '@/types/expense';
-import { createOrUpdateExcelFile, readExcelFile } from '@/utils/excel';
 import { parseExpenseMessage, sendWhatsAppMessage } from '@/utils/whatsapp';
 
 export async function POST(request: Request) {
@@ -49,9 +49,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Read existing expenses
-    const existingExpenses = await readExcelFile(userId);
-
     // Create new expense
     const newExpense: Expense = {
       id: `expense-${Date.now()}`,
@@ -60,8 +57,19 @@ export async function POST(request: Request) {
       userId,
     };
 
-    // Update Excel file with new expense
-    await createOrUpdateExcelFile(userId, [...existingExpenses, newExpense]);
+    // Initialize Google Drive service
+    const googleDrive = await GoogleDriveService.getInstance();
+
+    // Append the new expense to Google Sheets
+    await googleDrive.appendData([
+      [
+        newExpense.date.toISOString(),
+        newExpense.amount,
+        newExpense.category,
+        newExpense.note,
+        newExpense.userId,
+      ],
+    ]);
 
     // Send confirmation message
     await sendWhatsAppMessage(

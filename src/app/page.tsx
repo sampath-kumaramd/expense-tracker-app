@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 
-import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
 
 import { GoogleSheetsConnect } from '@/components/GoogleSheetsConnect';
@@ -156,7 +155,11 @@ export default function Dashboard() {
                 {expenses.map((expense) => (
                   <tr key={expense.id} className="border-b">
                     <td className="py-2">
-                      {format(new Date(expense.date), 'MMM dd, yyyy')}
+                      {expense.date.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
                     </td>
                     <td className="py-2">${expense.amount.toFixed(2)}</td>
                     <td className="py-2">{expense.category}</td>

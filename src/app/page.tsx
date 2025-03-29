@@ -9,6 +9,7 @@ import { GoogleSheetInput } from '@/components/GoogleSheetInput';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { useGoogleSheets } from '@/hooks/useGoogleSheets';
+import { GoogleDriveService } from '@/services/googleDrive';
 import { Expense, ExpenseCategory } from '@/types/expense';
 
 export default function Dashboard() {
@@ -36,6 +37,8 @@ export default function Dashboard() {
 
   const handleSheetUrlSubmit = (id: string) => {
     console.log('handleSheetUrlSubmit', id);
+    localStorage.setItem('sheetId', id);
+    GoogleDriveService.getInstance().setSpreadsheetId(id);
     setSheetId(id);
   };
 
